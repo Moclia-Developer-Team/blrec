@@ -11,7 +11,7 @@ COPY setup.py setup.cfg ./
 RUN sed -i "s/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g" /etc/apt/sources.list && \
     sed -i "s/security.debian.org/mirrors.tuna.tsinghua.edu.cn/g" /etc/apt/sources.list && \
     apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg build-essential python3-dev && \
+    apt-get install -y --no-install-recommends curl ffmpeg build-essential python3-dev && \
     rm -rf /var/lib/apt/lists/* && \
     pip3 install -i https://mirrors.aliyun.com/pypi/simple --no-cache-dir -e . && \
     apt-get purge -y --auto-remove build-essential python3-dev
@@ -21,6 +21,8 @@ ENV BLREC_DEFAULT_SETTINGS_FILE=/cfg/settings.toml
 ENV BLREC_DEFAULT_LOG_DIR=/log
 ENV BLREC_DEFAULT_OUT_DIR=/rec
 ENV TZ="Asia/Shanghai"
+
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 CMD curl -sf http://127.0.0.1:2233/api/v1/app/status || exit 1
 
 EXPOSE 2233
 ENTRYPOINT ["blrec", "--host", "0.0.0.0", "--no-progress"]
